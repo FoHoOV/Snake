@@ -16,9 +16,7 @@ class GameManager:
         self.state = None
         self.restart = False
 
-    def setup(self, initial_direction, initial_snake_shape, initial_snake_length, max_food_blocks_length,
-              max_speed_blocks_length,
-              fps):
+    def setup(self, **kwargs):
         # use shape horizontally and starting direction left and right or shape vertically
         # and starting direction top or bottom
 
@@ -26,18 +24,20 @@ class GameManager:
             if self.snake.handler:
                 if self.snake.handler.is_alive():
                     self.snake.handler.cancel()
-                    handler = None
+                    self.snake.handler = None
 
-        SnakeGame.config.WIN_WIDTH = 900
-        SnakeGame.config.WIN_HEIGHT = 900
-        SnakeGame.config.CORNERS_BLOCK_WIDTH = Shape.get_size(Shape.CORNERS_BLOCK)[0]
-        SnakeGame.config.CORNERS_BLOCK_HEIGHT = Shape.get_size(Shape.CORNERS_BLOCK)[1]
-        SnakeGame.config.INITIAL_SNAKE_LENGTH = initial_snake_length
-        SnakeGame.config.INITIAL_DIRECTION = initial_direction
-        SnakeGame.config.MAX_FOOD_BLOCKS_LENGTH = max_food_blocks_length
-        SnakeGame.config.MAX_SPEED_BLOCKS_LENGTH = max_speed_blocks_length
-        SnakeGame.config.SNAKE_SHAPE = initial_snake_shape
-        SnakeGame.config.FPS = fps
+        if kwargs.get('initial_snake_length'):
+            SnakeGame.config.INITIAL_SNAKE_LENGTH = kwargs.get('initial_snake_length')
+        if kwargs.get('initial_direction'):
+            SnakeGame.config.INITIAL_DIRECTION = kwargs.get('initial_direction')
+        if kwargs.get('max_food_blocks_length'):
+            SnakeGame.config.MAX_FOOD_BLOCKS_LENGTH = kwargs.get('max_food_blocks_length')
+        if kwargs.get('max_speed_blocks_length'):
+            SnakeGame.config.MAX_SPEED_BLOCKS_LENGTH = kwargs.get('max_speed_blocks_length')
+        if kwargs.get('initial_snake_shape'):
+            SnakeGame.config.SNAKE_SHAPE = kwargs.get('initial_snake_shape')
+        if kwargs.get('fps'):
+            SnakeGame.config.FPS = kwargs.get('fps')
 
         self.window = pygame.display.set_mode((SnakeGame.config.WIN_WIDTH, SnakeGame.config.WIN_HEIGHT))
         pygame.init()
@@ -48,7 +48,7 @@ class GameManager:
 
         self.state = GameState()
 
-        self.snake = Snake(initial_snake_length, initial_direction)
+        self.snake = Snake(SnakeGame.config.INITIAL_SNAKE_LENGTH, SnakeGame.config.INITIAL_DIRECTION)
 
     def start(self):
         food_loop_counter = 0
@@ -204,7 +204,7 @@ class GameManager:
         pygame.quit()
 
     def run(self):
-        self.setup(Direction.LEFT, SnakeShapes.HORIZONTALLY, 19, 5, 1, 60)
+        self.setup()
         self.start()
         # if we loose or quit initiates end
         self.end()

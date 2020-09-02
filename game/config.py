@@ -1,19 +1,24 @@
+from game.movement.coordiantes import Direction
+from game.shape.shape import Shape, SnakeShapes
+
+
 class Config:
     def __init__(self):
-        self.WIN_WIDTH = 0
-        self.WIN_HEIGHT = 0
+        """created with some defaults that can be changed if desired"""
+        self.WIN_WIDTH = 900
+        self.WIN_HEIGHT = 900
 
-        self.CORNERS_BLOCK_HEIGHT = 0
-        self.CORNERS_BLOCK_WIDTH = 0
+        self.CORNERS_BLOCK_HEIGHT = Shape.get_size(Shape.CORNERS_BLOCK)[0]
+        self.CORNERS_BLOCK_WIDTH = Shape.get_size(Shape.CORNERS_BLOCK)[0]
 
-        self.INITIAL_SNAKE_LENGTH = 0
-        self.MAX_FOOD_BLOCKS_LENGTH = 0
-        self.MAX_SPEED_BLOCKS_LENGTH = 0
+        self.INITIAL_SNAKE_LENGTH =19
+        self.MAX_FOOD_BLOCKS_LENGTH = 5
+        self.MAX_SPEED_BLOCKS_LENGTH = 2
 
-        self.INITIAL_DIRECTION = ''
+        self.INITIAL_DIRECTION = Direction.LEFT
 
-        self.SNAKE_SHAPE = ''
+        self.SNAKE_SHAPE =SnakeShapes.HORIZONTALLY
 
-        self.FPS = 0
+        self.FPS = 60
         self.AI = True
         self.EASY_MODE = True
