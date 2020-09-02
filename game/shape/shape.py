@@ -396,6 +396,7 @@ class Snake:
     def __init__(self, snake_length, initial_direction):
         self.food_blocks_eaten = 0
         self.change_snake_speed = False
+        self.handler = None
         self.snake_blocks = [
             SnakeBlock(self, 0, SnakeGame.config.WIN_WIDTH / 2, SnakeGame.config.WIN_HEIGHT / 2, initial_direction)]
         self.snake_blocks[0].color = ShapeColors.BLUE_PURPLE_COLOR
@@ -484,12 +485,11 @@ class Snake:
             self[0].position.velocity = SnakeBlock.DEFAULT_VELOCITY
 
         self[0].position.velocity += 1
-        # TODO: change this handler to be local to every Snake class
-        if SnakeGame.game_manager.handler:
-            if SnakeGame.game_manager.handler.is_alive():
-                SnakeGame.game_manager.handler.cancel()
-        SnakeGame.game_manager.handler = Timer(time_limit, reset_velocity)
-        SnakeGame.game_manager.handler.start()
+        if self.handler:
+            if self.handler.is_alive():
+                self.handler.cancel()
+        self.handler = Timer(time_limit, reset_velocity)
+        self.handler.start()
 
     def update_block_position(self, snake_block, changing_value, is_horizontal):
         Movement.update_position(Shape.SNAKE_BLOCK, snake_block.position, changing_value, is_horizontal)

@@ -13,7 +13,6 @@ class GameManager:
         # index 0 = head
         self.snake = None
         self.state = None
-        self.handler = None
         self.restart = False
 
     def setup(self, initial_direction, initial_snake_shape, initial_snake_length, max_food_blocks_length,
@@ -22,10 +21,11 @@ class GameManager:
         # use shape horizontally and starting direction left and right or shape vertically
         # and starting direction top or bottom
 
-        if self.handler:
-            if self.handler.is_alive():
-                self.handler.cancel()
-                handler = None
+        if self.snake:
+            if self.snake.handler:
+                if self.snake.handler.is_alive():
+                    self.snake.handler.cancel()
+                    handler = None
 
         SnakeGame.config.WIN_WIDTH = 900
         SnakeGame.config.WIN_HEIGHT = 900
@@ -195,8 +195,8 @@ class GameManager:
                 print('BYE :)')
                 running = False
 
-        if self.handler and self.handler.is_alive():
-            self.handler.cancel()
+        if self.snake.handler and self.snake.handler.is_alive():
+            self.snake.handler.cancel()
 
         change_best_score()
         pygame.quit()
