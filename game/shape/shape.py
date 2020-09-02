@@ -506,6 +506,18 @@ class Snake:
                     BlockPosition(snake_block.position.x, snake_block.position.y, snake_block.position.velocity,
                                   snake_block.position.direction))
 
+    def move_up(self):
+        self.draw(pygame.K_UP)
+
+    def move_right(self):
+        self.draw(pygame.K_RIGHT)
+
+    def move_left(self):
+        self.draw(pygame.K_LEFT)
+
+    def move_down(self):
+        self.draw(pygame.K_DOWN)
+
     def append(self, snake_block: SnakeBlock):
         self.snake_blocks.append(snake_block)
 
