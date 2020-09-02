@@ -44,13 +44,15 @@ class Shape:
     # circles
     SNAKE_CIRCLE = 'snake_circle'
 
-    def __init__(self, type: str, color=None):
+    def __init__(self, type: str, x, y, color=None):
 
         if type.find("circle") > 0:
             self.base_type = Shape.CIRCLE
 
         elif type.find("block") > 0:
             self.base_type = Shape.BLOCK
+
+        self.position = Position(x, y, 0, Direction.FIXED)
 
         self.type = type
         if color:
@@ -90,11 +92,19 @@ class Shape:
 
     def draw(self, **kwargs):
         if self.type == Shape.SNAKE_CIRCLE:
-            pygame.draw.circle(SnakeGame.game_manager.window, self.color,
-                               (int(kwargs['x']), int(kwargs['y'])), int(self.width / 2))
+            if kwargs.get('x'):
+                pygame.draw.circle(SnakeGame.game_manager.window, self.color,
+                                   (int(kwargs['x']), int(kwargs['y'])), int(self.radios))
+            else:
+                pygame.draw.circle(SnakeGame.game_manager.window, self.color,
+                                   (self.position.x, self.position.y), int(self.radios))
         else:
-            pygame.draw.rect(SnakeGame.game_manager.window, self.color,
-                             (kwargs['x'], kwargs['y'], self.width, self.height))
+            if kwargs.get('x'):
+                pygame.draw.rect(SnakeGame.game_manager.window, self.color,
+                                 (kwargs['x'], kwargs['y'], self.width, self.height))
+            else:
+                pygame.draw.rect(SnakeGame.game_manager.window, self.color,
+                                 (self.position.x, self.position.y, self.width, self.height))
 
     @staticmethod
     def get_size_n(shape_type):
@@ -148,7 +158,7 @@ class SnakeBlock(Shape):
     DEFAULT_VELOCITY = 3
 
     def __init__(self, snake_ref, index, x, y, direction=Direction.LEFT):
-        super(SnakeBlock, self).__init__(Shape.SNAKE_BLOCK)
+        super(SnakeBlock, self).__init__(Shape.SNAKE_BLOCK, x, y)
         self.index = index
         self.snake_ref = snake_ref
         # 3d_argument is starting_direction
@@ -222,23 +232,23 @@ class SnakeBlock(Shape):
         speeds_to_delete = []
         foods_to_delete = []
 
-        for food_coordinates in SnakeGame.game_manager.state.food_blocks_coordinates:
-            if self.is_hit_this_block(SnakeBlock(self.snake_ref, -1, food_coordinates[0], food_coordinates[1])):
+        for food_block in SnakeGame.game_manager.state.food_blocks:
+            if self.is_hit_this_block(food_block):
                 self.snake_ref.food_blocks_eaten += 1
-                foods_to_delete.append(food_coordinates)
+                foods_to_delete.append(food_block)
         if len(foods_to_delete) > 0:
-            SnakeGame.game_manager.state.food_blocks_coordinates = [food_block for food_block in
-                                                                    SnakeGame.game_manager.state.food_blocks_coordinates
+            SnakeGame.game_manager.state.food_blocks = [food_block for food_block in
+                                                                    SnakeGame.game_manager.state.food_blocks
                                                                     if
                                                                     food_block not in foods_to_delete]
-        for speed_coordinates in SnakeGame.game_manager.state.speed_blocks_coordinates:
-            if self.is_hit_this_block(SnakeBlock(self.snake_ref, -1, speed_coordinates[0], speed_coordinates[1])):
-                speeds_to_delete.append(speed_coordinates)
+        for speed_block in SnakeGame.game_manager.state.speed_blocks:
+            if self.is_hit_this_block(speed_block):
+                speeds_to_delete.append(speed_block)
 
         if len(speeds_to_delete) > 0:
             self.snake_ref.change_snake_speed = True
-            SnakeGame.game_manager.state.speed_blocks_coordinates = [speed_block for speed_block in
-                                                                     SnakeGame.game_manager.state.speed_blocks_coordinates
+            SnakeGame.game_manager.state.speed_blocks = [speed_block for speed_block in
+                                                                     SnakeGame.game_manager.state.speed_blocks
                                                                      if
                                                                      speed_block not in speeds_to_delete]
 
@@ -507,16 +517,16 @@ class Snake:
                                   snake_block.position.direction))
 
     def move_up(self):
-        self.draw(pygame.K_UP)
+        self.draw([pygame.K_UP])
 
     def move_right(self):
-        self.draw(pygame.K_RIGHT)
+        self.draw([pygame.K_RIGHT])
 
     def move_left(self):
-        self.draw(pygame.K_LEFT)
+        self.draw([pygame.K_LEFT])
 
     def move_down(self):
-        self.draw(pygame.K_DOWN)
+        self.draw([pygame.K_DOWN])
 
     def append(self, snake_block: SnakeBlock):
         self.snake_blocks.append(snake_block)

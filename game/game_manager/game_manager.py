@@ -1,3 +1,4 @@
+from game.ai.snake_ai import SnakeAI
 from game.movement.coordiantes import Position, Direction
 from game.shape.shape import SnakeShapes, Shape, Snake, SnakeBlock
 from game.state.game_state import GameState
@@ -47,9 +48,6 @@ class GameManager:
 
         self.state = GameState()
 
-        # index 0 is for x and 1 is for y
-        self.state.food_blocks_coordinates = []
-        self.state.speed_blocks_coordinates = []
         self.snake = Snake(initial_snake_length, initial_direction)
 
     def start(self):
@@ -58,9 +56,15 @@ class GameManager:
         pause_loop_counter = 0
         self.state.is_paused = False
         game_paused_text = self.font.render('pause! (press space again to continue)', 1, (255, 255, 255))
-        corner_block = Shape(Shape.CORNERS_BLOCK)
-        food_block = Shape(Shape.FOOD_BLOCK)
-        speed_block = Shape(Shape.SPEED_BLOCK)
+
+        corner_blocks = [
+            Shape(Shape.CORNERS_BLOCK, x=0, y=0),
+            Shape(Shape.CORNERS_BLOCK, x=SnakeGame.config.WIN_WIDTH - SnakeGame.config.CORNERS_BLOCK_WIDTH, y=0),
+            Shape(Shape.CORNERS_BLOCK, x=0, y=SnakeGame.config.WIN_HEIGHT - SnakeGame.config.CORNERS_BLOCK_HEIGHT),
+            Shape(Shape.CORNERS_BLOCK, x=SnakeGame.config.WIN_WIDTH - SnakeGame.config.CORNERS_BLOCK_WIDTH,
+                  y=SnakeGame.config.WIN_HEIGHT - SnakeGame.config.CORNERS_BLOCK_HEIGHT)
+        ]
+        snake_ai = SnakeAI()
         # mainloop
         while not self.state.is_lost():
             self.clock.tick(SnakeGame.config.FPS)
@@ -81,17 +85,20 @@ class GameManager:
             if self.state.is_paused:
                 self.snake.draw(None)
             else:
+                snake_ai.move()
                 is_key_pressed = False
                 pressed_keys_for_snake = None
                 # change to elif if you want to disable X and Y move at the same time
                 if food_loop_counter >= 150:
-                    if len(self.state.food_blocks_coordinates) < SnakeGame.config.MAX_FOOD_BLOCKS_LENGTH:
-                        self.state.food_blocks_coordinates.append(Position.random_position_generator())
+                    if len(self.state.food_blocks) < SnakeGame.config.MAX_FOOD_BLOCKS_LENGTH:
+                        pos = Position.random_position_generator()
+                        self.state.food_blocks.append(Shape(Shape.FOOD_BLOCK, x=pos[0], y=pos[1]))
                     food_loop_counter = 0
                     if speed_loop_counter > 5:
-                        if len(self.state.speed_blocks_coordinates) < SnakeGame.config.MAX_SPEED_BLOCKS_LENGTH and (
+                        if len(self.state.speed_blocks) < SnakeGame.config.MAX_SPEED_BLOCKS_LENGTH and (
                                 randint(1, 20) < 10):
-                            self.state.speed_blocks_coordinates.append(Position.random_position_generator())
+                            pos = Position.random_position_generator()
+                            self.state.speed_blocks.append(Shape(Shape.SPEED_BLOCK, x=pos[0], y=pos[1]))
                         speed_loop_counter = 0
                     speed_loop_counter += 1
                 food_loop_counter = food_loop_counter + 1
@@ -118,17 +125,12 @@ class GameManager:
                     pressed_keys_for_snake.append(pygame.K_UP)
                 self.snake.draw(pressed_keys_for_snake)
 
-            for food_coordinate in self.state.food_blocks_coordinates:
-                food_block.draw(x=food_coordinate[0], y=food_coordinate[1])
-            for speed_coordinate in self.state.speed_blocks_coordinates:
-                speed_block.draw(x=speed_coordinate[0], y=speed_coordinate[1])
-            # corners
-
-            corner_block.draw(x=0, y=0)
-            corner_block.draw(x=SnakeGame.config.WIN_WIDTH - SnakeGame.config.CORNERS_BLOCK_WIDTH, y=0)
-            corner_block.draw(x=0, y=SnakeGame.config.WIN_HEIGHT - SnakeGame.config.CORNERS_BLOCK_HEIGHT)
-            corner_block.draw(x=SnakeGame.config.WIN_WIDTH - SnakeGame.config.CORNERS_BLOCK_WIDTH,
-                              y=SnakeGame.config.WIN_HEIGHT - SnakeGame.config.CORNERS_BLOCK_HEIGHT)
+            for food_block in self.state.food_blocks:
+                food_block.draw()
+            for speed_block in self.state.speed_blocks:
+                speed_block.draw()
+            for corner_block in corner_blocks:
+                corner_block.draw()
 
             score_text = self.font.render('Score: ' + str(GameState.get_score()), 1, (255, 255, 255))
             if self.state.is_paused:

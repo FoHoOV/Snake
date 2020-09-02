@@ -15,3 +15,5 @@ class Config:
         self.SNAKE_SHAPE = ''
 
         self.FPS = 0
+        self.AI = True
+        self.EASY_MODE = True

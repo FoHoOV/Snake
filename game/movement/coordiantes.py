@@ -37,5 +37,4 @@ class Direction:
     LEFT = 'left'
     TOP = 'top'
     BOTTOM = 'bottom'
-
-
+    FIXED = 'fixed'

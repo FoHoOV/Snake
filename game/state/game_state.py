@@ -10,10 +10,9 @@ class GameState:
 
     def __init__(self):
         self.loosing_reason = ''
-        self.easy_mode = False
         self.is_paused = False
-        self.food_blocks_coordinates = None
-        self.speed_blocks_coordinates = None
+        self.food_blocks = []
+        self.speed_blocks = []
 
     def set_loosing_state(self, loosing_reason):
         self.loosing_reason = loosing_reason
@@ -22,7 +21,7 @@ class GameState:
         self.loosing_reason = ''
 
     def is_lost(self) -> bool:
-        if self.easy_mode:
+        if SnakeGame.config.EASY_MODE:
             return False
         else:
             if self.loosing_reason != '':
