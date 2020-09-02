@@ -1,12 +1,9 @@
-from game.shape.shape import SnakeShapes, Shape, create_snake, SnakeBlock
+from game.movement.coordiantes import Position, Direction
+from game.shape.shape import SnakeShapes, Shape, Snake, SnakeBlock
 from game.state.game_state import GameState
 from game import pygame, SnakeGame
 import os
 from random import randint
-
-
-def random_position_generator() -> list:
-    return [randint(0, SnakeGame.config.WIN_WIDTH), randint(0, SnakeGame.config.WIN_HEIGHT)]
 
 
 class GameManager:
@@ -14,7 +11,7 @@ class GameManager:
     def __init__(self):
         self.window = None
         # index 0 = head
-        self.snake = []
+        self.snake = None
         self.state = None
         self.handler = None
         self.restart = False
@@ -53,7 +50,7 @@ class GameManager:
         # index 0 is for x and 1 is for y
         self.state.food_blocks_coordinates = []
         self.state.speed_blocks_coordinates = []
-        create_snake(initial_snake_length, initial_direction)
+        self.snake = Snake(initial_snake_length, initial_direction)
 
     def start(self):
         food_loop_counter = 0
@@ -82,48 +79,44 @@ class GameManager:
             else:
                 pause_loop_counter = 0
             if self.state.is_paused:
-                for snake_block in self.snake:
-                    snake_block.draw(None)
+                self.snake.draw(None)
             else:
                 is_key_pressed = False
                 pressed_keys_for_snake = None
                 # change to elif if you want to disable X and Y move at the same time
                 if food_loop_counter >= 150:
                     if len(self.state.food_blocks_coordinates) < SnakeGame.config.MAX_FOOD_BLOCKS_LENGTH:
-                        self.state.food_blocks_coordinates.append(random_position_generator())
+                        self.state.food_blocks_coordinates.append(Position.random_position_generator())
                     food_loop_counter = 0
                     if speed_loop_counter > 5:
                         if len(self.state.speed_blocks_coordinates) < SnakeGame.config.MAX_SPEED_BLOCKS_LENGTH and (
                                 randint(1, 20) < 10):
-                            self.state.speed_blocks_coordinates.append(random_position_generator())
+                            self.state.speed_blocks_coordinates.append(Position.random_position_generator())
                         speed_loop_counter = 0
                     speed_loop_counter += 1
                 food_loop_counter = food_loop_counter + 1
-                for snake_block in self.snake:
-                    if snake_block.index == 0:
-                        if pressed_keys[pygame.K_RIGHT]:
-                            if not is_key_pressed:
-                                pressed_keys_for_snake = []
-                            is_key_pressed = True
-                            pressed_keys_for_snake.append(pygame.K_RIGHT)
-                        if pressed_keys[pygame.K_LEFT]:
-                            if not is_key_pressed:
-                                pressed_keys_for_snake = []
-                            is_key_pressed = True
-                            pressed_keys_for_snake.append(pygame.K_LEFT)
-                        if pressed_keys[pygame.K_DOWN]:
-                            if not is_key_pressed:
-                                pressed_keys_for_snake = []
-                            is_key_pressed = True
-                            pressed_keys_for_snake.append(pygame.K_DOWN)
-                        if pressed_keys[pygame.K_UP]:
-                            if not is_key_pressed:
-                                pressed_keys_for_snake = []
-                            is_key_pressed = True
-                            pressed_keys_for_snake.append(pygame.K_UP)
-                        snake_block.draw(pressed_keys_for_snake)
-                    else:
-                        snake_block.draw(None)
+
+                if pressed_keys[pygame.K_RIGHT]:
+                    if not is_key_pressed:
+                        pressed_keys_for_snake = []
+                    is_key_pressed = True
+                    pressed_keys_for_snake.append(pygame.K_RIGHT)
+                if pressed_keys[pygame.K_LEFT]:
+                    if not is_key_pressed:
+                        pressed_keys_for_snake = []
+                    is_key_pressed = True
+                    pressed_keys_for_snake.append(pygame.K_LEFT)
+                if pressed_keys[pygame.K_DOWN]:
+                    if not is_key_pressed:
+                        pressed_keys_for_snake = []
+                    is_key_pressed = True
+                    pressed_keys_for_snake.append(pygame.K_DOWN)
+                if pressed_keys[pygame.K_UP]:
+                    if not is_key_pressed:
+                        pressed_keys_for_snake = []
+                    is_key_pressed = True
+                    pressed_keys_for_snake.append(pygame.K_UP)
+                self.snake.draw(pressed_keys_for_snake)
 
             for food_coordinate in self.state.food_blocks_coordinates:
                 food_block.draw(x=food_coordinate[0], y=food_coordinate[1])
@@ -209,7 +202,7 @@ class GameManager:
         pygame.quit()
 
     def run(self):
-        self.setup(SnakeBlock.LEFT, SnakeShapes.HORIZONTALLY, 19, 5, 1, 60)
+        self.setup(Direction.LEFT, SnakeShapes.HORIZONTALLY, 19, 5, 1, 60)
         self.start()
         # if we loose or quit initiates end
         self.end()
