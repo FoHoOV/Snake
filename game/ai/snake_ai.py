@@ -14,9 +14,11 @@ class SnakeAI:
     def has_target(self):
         return not (self.targeted_food_block is None)
 
-    def move(self):
+    def create_target_if_exists(self):
         if self.targeted_food_block is None and len(SnakeGame.game_manager.state.food_blocks) > 0:
             self.targeted_food_block = SnakeGame.game_manager.state.food_blocks[0]
+
+    def move(self):
         if self.targeted_food_block and self.targeted_food_block in SnakeGame.game_manager.state.food_blocks:
             pressed_keys = []
             if self.targeted_food_block.position.x > self.snake[0].position.x:

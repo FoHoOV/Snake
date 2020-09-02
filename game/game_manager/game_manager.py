@@ -123,9 +123,12 @@ class GameManager:
                     is_key_pressed = True
                     pressed_keys_for_snake.append(pygame.K_UP)
                 if SnakeGame.config.AI:
-                    snake_ai.move()
+                    if not snake_ai.has_target():
+                        snake_ai.create_target_if_exists()
                     if is_key_pressed or not snake_ai.has_target():
                         self.snake.draw(pressed_keys_for_snake)
+                    else:
+                        snake_ai.move()
                 else:
                     self.snake.draw(pressed_keys_for_snake)
 
