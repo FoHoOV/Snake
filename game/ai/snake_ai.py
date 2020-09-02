@@ -11,6 +11,9 @@ class SnakeAI:
         self.snake = SnakeGame.game_manager.snake
         self.targeted_food_block = None
 
+    def has_target(self):
+        return not (self.targeted_food_block is None)
+
     def move(self):
         if self.targeted_food_block is None and len(SnakeGame.game_manager.state.food_blocks) > 0:
             self.targeted_food_block = SnakeGame.game_manager.state.food_blocks[0]

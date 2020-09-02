@@ -85,7 +85,6 @@ class GameManager:
             if self.state.is_paused:
                 self.snake.draw(None)
             else:
-                snake_ai.move()
                 is_key_pressed = False
                 pressed_keys_for_snake = None
                 # change to elif if you want to disable X and Y move at the same time
@@ -123,7 +122,12 @@ class GameManager:
                         pressed_keys_for_snake = []
                     is_key_pressed = True
                     pressed_keys_for_snake.append(pygame.K_UP)
-                self.snake.draw(pressed_keys_for_snake)
+                if SnakeGame.config.AI:
+                    snake_ai.move()
+                    if is_key_pressed or not snake_ai.has_target():
+                        self.snake.draw(pressed_keys_for_snake)
+                else:
+                    self.snake.draw(pressed_keys_for_snake)
 
             for food_block in self.state.food_blocks:
                 food_block.draw()
