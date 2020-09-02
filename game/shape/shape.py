@@ -233,7 +233,7 @@ class SnakeBlock(Shape):
         foods_to_delete = []
 
         for food_block in SnakeGame.game_manager.state.food_blocks:
-            if self.is_hit_this_block(food_block):
+            if self.is_collided_with_block(food_block):
                 self.snake_ref.food_blocks_eaten += 1
                 foods_to_delete.append(food_block)
         if len(foods_to_delete) > 0:
@@ -242,7 +242,7 @@ class SnakeBlock(Shape):
                                                                     if
                                                                     food_block not in foods_to_delete]
         for speed_block in SnakeGame.game_manager.state.speed_blocks:
-            if self.is_hit_this_block(speed_block):
+            if self.is_collided_with_block(speed_block):
                 speeds_to_delete.append(speed_block)
 
         if len(speeds_to_delete) > 0:
@@ -324,7 +324,7 @@ class SnakeBlock(Shape):
             return True
         return False
 
-    def is_hit_this_block(self, snake_block) -> bool:
+    def is_collided_with_block(self, snake_block) -> bool:
         result = False
 
         def check_equality_state(snake_block_x, self_x, snake_block_y, self_y) -> bool:
@@ -473,7 +473,7 @@ class Snake:
                         self.update_block_position(snake_block,
                                                    -snake_block.position.velocity, True)
             else:
-                if snake_block.is_hit_this_block(self.snake_blocks[0]):
+                if snake_block.is_collided_with_block(self.snake_blocks[0]):
                     SnakeGame.game_manager.state.set_loosing_state(GameState.HIT_IT_SELF)
                 for position in snake_block.positions_to_go[0]:
                     if position.direction == Direction.TOP:
