@@ -1,3 +1,5 @@
+import datetime
+from random import randint
 from threading import Timer
 
 from game import pygame, SnakeGame
@@ -44,7 +46,10 @@ class Shape:
     # circles
     SNAKE_CIRCLE = 'snake_circle'
 
-    def __init__(self, type: str, x, y, color=None):
+    _DEFAULT_VELOCITY = 10
+
+    def __init__(self, type: str, x, y, color=None, randomize_position=False, randomize_position_interval=0,
+                 randomize_position_time_limit=5):
 
         if type.find("circle") > 0:
             self.base_type = Shape.CIRCLE
@@ -52,8 +57,10 @@ class Shape:
         elif type.find("block") > 0:
             self.base_type = Shape.BLOCK
 
-        self.position = Position(x, y, 0, Direction.FIXED)
-
+        if type == Shape.FOOD_BLOCK:
+            self.position = Position(x, y, 5, Direction.FIXED)
+        else:
+            self.position = Position(x, y, 0, Direction.FIXED)
         self.type = type
         if color:
             self.color = color
@@ -89,8 +96,38 @@ class Shape:
         elif self.base_type == Shape.CIRCLE:
             if type == Shape.SNAKE_CIRCLE:
                 self.radios = 15
+        self.randomize_position = randomize_position
+        self._randomize_position_s = None
+        self._randomize_position_e = None
+        self.randomize_position_time_limit = randomize_position_time_limit
+        self.randomize_position_interval = randomize_position_interval
 
     def draw(self, **kwargs):
+        if self.randomize_position:
+            if not self._randomize_position_s:
+                self._randomize_position_s = datetime.datetime.utcnow().now()
+
+            if datetime.datetime.utcnow() - self._randomize_position_s < datetime.timedelta(
+                    seconds=self.randomize_position_time_limit):
+                rand_num = randint(1, 10000)
+                if rand_num < 100:
+                    self.move_up()
+                elif rand_num < 200:
+                    self.move_down()
+                elif rand_num < 300:
+                    self.move_right()
+                elif rand_num < 400:
+                    self.move_left()
+                else:
+                    self.continue_last_move()
+            else:
+                if not self._randomize_position_e:
+                    self._randomize_position_e = datetime.datetime.utcnow().now()
+                if datetime.datetime.utcnow() - self._randomize_position_e > datetime.timedelta(
+                        seconds=self.randomize_position_interval):
+                    self._randomize_position_s = None
+                    self._randomize_position_e = None
+
         if self.type == Shape.SNAKE_CIRCLE:
             if kwargs.get('x'):
                 pygame.draw.circle(SnakeGame.game_manager.window, self.color,
@@ -105,6 +142,62 @@ class Shape:
             else:
                 pygame.draw.rect(SnakeGame.game_manager.window, self.color,
                                  (self.position.x, self.position.y, self.width, self.height))
+
+    def move_up(self):
+        if self.position.velocity == 0:
+            Movement.update_position(shape_type=self.type,
+                                     position=self.position,
+                                     changing_value=-Shape._DEFAULT_VELOCITY, is_horizontal=False)
+
+        else:
+            Movement.update_position(shape_type=self.type,
+                                     position=self.position,
+                                     changing_value=-self.position.velocity, is_horizontal=False)
+
+    def move_down(self):
+        if self.position.velocity == 0:
+            Movement.update_position(shape_type=self.type,
+                                     position=self.position,
+                                     changing_value=Shape._DEFAULT_VELOCITY, is_horizontal=False)
+
+        else:
+            Movement.update_position(shape_type=self.type,
+                                     position=self.position,
+                                     changing_value=self.position.velocity, is_horizontal=False)
+
+    def move_right(self):
+        if self.position.velocity == 0:
+            Movement.update_position(shape_type=self.type,
+                                     position=self.position,
+                                     changing_value=Shape._DEFAULT_VELOCITY, is_horizontal=True)
+
+        else:
+            Movement.update_position(shape_type=self.type,
+                                     position=self.position,
+                                     changing_value=self.position.velocity, is_horizontal=True)
+
+    def move_left(self):
+        if self.position.velocity == 0:
+            Movement.update_position(shape_type=self.type,
+                                     position=self.position,
+                                     changing_value=-Shape._DEFAULT_VELOCITY, is_horizontal=True)
+
+        else:
+            Movement.update_position(shape_type=self.type,
+                                     position=self.position,
+                                     changing_value=-self.position.velocity, is_horizontal=True)
+
+    def continue_last_move(self):
+        if self.position.direction == Direction.FIXED:
+            self.position.direction = Direction.RIGHT
+        if self.position.direction == Direction.RIGHT:
+            self.move_right()
+        elif self.position.direction == Direction.LEFT:
+            self.move_left()
+        elif self.position.direction == Direction.UP:
+            self.move_up()
+        elif self.position.direction == Direction.DOWN:
+            self.move_down()
 
     @staticmethod
     def get_size_n(shape_type):
@@ -196,25 +289,25 @@ class SnakeBlock(Shape):
                         BlockPosition(next_hops[-1][0].x - self.position.velocity, self.position.y,
                                       self.position.velocity,
                                       Direction.LEFT)])
-            elif last_snake.position.direction == Direction.TOP:
+            elif last_snake.position.direction == Direction.UP:
                 next_y_position = last_snake.position.y
                 next_hops.append([
                     BlockPosition(self.position.x, self.position.y - self.position.velocity,
-                                  self.position.velocity, Direction.TOP)])
+                                  self.position.velocity, Direction.UP)])
                 while next_hops[-1][0].y > next_y_position:
                     next_hops.append([
                         BlockPosition(self.position.x, next_hops[-1][0].y - self.position.velocity,
-                                      self.position.velocity, Direction.TOP)])
-            elif last_snake.position.direction == Direction.BOTTOM:
+                                      self.position.velocity, Direction.UP)])
+            elif last_snake.position.direction == Direction.DOWN:
                 next_y_position = last_snake.position.y
                 next_hops.append([
                     BlockPosition(self.position.x, self.position.y + self.position.velocity,
-                                  self.position.velocity, Direction.BOTTOM)])
+                                  self.position.velocity, Direction.DOWN)])
                 while next_hops[-1][0].y < next_y_position:
                     next_hops.append([
                         BlockPosition(self.position.x, next_hops[-1][0].y + self.position.velocity,
                                       self.position.velocity,
-                                      Direction.BOTTOM)])
+                                      Direction.DOWN)])
             return next_hops
         else:
             return [None]
@@ -238,9 +331,9 @@ class SnakeBlock(Shape):
                 foods_to_delete.append(food_block)
         if len(foods_to_delete) > 0:
             SnakeGame.game_manager.state.food_blocks = [food_block for food_block in
-                                                                    SnakeGame.game_manager.state.food_blocks
-                                                                    if
-                                                                    food_block not in foods_to_delete]
+                                                        SnakeGame.game_manager.state.food_blocks
+                                                        if
+                                                        food_block not in foods_to_delete]
         for speed_block in SnakeGame.game_manager.state.speed_blocks:
             if self.is_collided_with_block(speed_block):
                 speeds_to_delete.append(speed_block)
@@ -248,9 +341,9 @@ class SnakeBlock(Shape):
         if len(speeds_to_delete) > 0:
             self.snake_ref.change_snake_speed = True
             SnakeGame.game_manager.state.speed_blocks = [speed_block for speed_block in
-                                                                     SnakeGame.game_manager.state.speed_blocks
-                                                                     if
-                                                                     speed_block not in speeds_to_delete]
+                                                         SnakeGame.game_manager.state.speed_blocks
+                                                         if
+                                                         speed_block not in speeds_to_delete]
 
         if self.index == len(self.snake_ref) - 1:
             if self.snake_ref.food_blocks_eaten > 0:
@@ -259,11 +352,11 @@ class SnakeBlock(Shape):
                 starting_margin = SnakeBlock.BLOCK_MARGIN + (
                         ((last_snake.width + SnakeBlock.BLOCK_MARGIN) / SnakeBlock.DEFAULT_VELOCITY)
                         * (last_snake.position.velocity - SnakeBlock.DEFAULT_VELOCITY))
-                if last_snake.position.direction == Direction.TOP:
+                if last_snake.position.direction == Direction.UP:
                     self.snake_ref.append(SnakeBlock(self.snake_ref, last_snake.index + 1, last_snake.position.x,
                                                      last_snake.position.y + last_snake.height + starting_margin,
                                                      last_snake.position.direction))
-                elif last_snake.position.direction == Direction.BOTTOM:
+                elif last_snake.position.direction == Direction.DOWN:
                     self.snake_ref.append(SnakeBlock(self.snake_ref, last_snake.index + 1, last_snake.position.x,
                                                      last_snake.position.y - last_snake.height - starting_margin,
                                                      last_snake.position.direction))
@@ -295,12 +388,12 @@ class SnakeBlock(Shape):
                 self.position.tmp_y_vertical >= SnakeGame.config.WIN_HEIGHT - SnakeGame.config.CORNERS_BLOCK_HEIGHT) or (
                 self.position.tmp_y_horizontal != 0 and
                 self.position.tmp_y_horizontal >= SnakeGame.config.WIN_HEIGHT - SnakeGame.config.CORNERS_BLOCK_HEIGHT):
-            result[1] = Direction.BOTTOM
+            result[1] = Direction.DOWN
             result[2] = True
         elif self.position.y <= SnakeGame.config.CORNERS_BLOCK_HEIGHT or (
                 self.position.tmp_y_vertical != 0 and self.position.tmp_y_vertical <= SnakeGame.config.CORNERS_BLOCK_HEIGHT) or (
                 self.position.tmp_y_horizontal != 0 and self.position.tmp_y_horizontal <= SnakeGame.config.CORNERS_BLOCK_HEIGHT):
-            result[1] = Direction.TOP
+            result[1] = Direction.UP
             result[2] = True
 
         if self.position.x + self.width >= SnakeGame.config.WIN_WIDTH - SnakeGame.config.CORNERS_BLOCK_WIDTH or (
@@ -412,7 +505,7 @@ class Snake:
         self.snake_blocks[0].color = ShapeColors.BLUE_PURPLE_COLOR
         if snake_length > 1:
             if SnakeGame.config.SNAKE_SHAPE == SnakeShapes.VERTICALLY:
-                if initial_direction == Direction.TOP:
+                if initial_direction == Direction.UP:
                     for i in range(1, snake_length):
                         self.snake_blocks.append(
                             SnakeBlock(self, i, SnakeGame.config.WIN_WIDTH / 2,
@@ -460,10 +553,10 @@ class Snake:
                             self.update_block_position(snake_block,
                                                        snake_block.position.velocity, False)
                 else:
-                    if snake_block.position.direction == Direction.TOP:
+                    if snake_block.position.direction == Direction.UP:
                         self.update_block_position(snake_block,
                                                    -snake_block.position.velocity, False)
-                    elif snake_block.position.direction == Direction.BOTTOM:
+                    elif snake_block.position.direction == Direction.DOWN:
                         self.update_block_position(snake_block, snake_block.position.velocity,
                                                    False)
                     elif snake_block.position.direction == Direction.RIGHT:
@@ -476,9 +569,9 @@ class Snake:
                 if snake_block.is_collided_with_block(self.snake_blocks[0]):
                     SnakeGame.game_manager.state.set_loosing_state(GameState.HIT_IT_SELF)
                 for position in snake_block.positions_to_go[0]:
-                    if position.direction == Direction.TOP:
+                    if position.direction == Direction.UP:
                         self.update_block_position(snake_block, -position.velocity, False)
-                    elif position.direction == Direction.BOTTOM:
+                    elif position.direction == Direction.DOWN:
                         self.update_block_position(snake_block, position.velocity, False)
                     elif position.direction == Direction.RIGHT:
                         self.update_block_position(snake_block, position.velocity, True)
@@ -517,16 +610,16 @@ class Snake:
                                   snake_block.position.direction))
 
     def move_up(self):
-        self.draw([pygame.K_UP])
+        self[0].move_up()
 
     def move_right(self):
-        self.draw([pygame.K_RIGHT])
+        self[0].move_right()
 
     def move_left(self):
-        self.draw([pygame.K_LEFT])
+        self[0].move_left()
 
     def move_down(self):
-        self.draw([pygame.K_DOWN])
+        self[0].move_down()
 
     def append(self, snake_block: SnakeBlock):
         self.snake_blocks.append(snake_block)

@@ -21,6 +21,8 @@ class GameState:
         self.loosing_reason = ''
 
     def is_lost(self) -> bool:
+        if self.loosing_reason == GameState.CLOSED_BY_USER:
+            return True
         if SnakeGame.config.EASY_MODE:
             return False
         else:

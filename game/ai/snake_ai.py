@@ -1,5 +1,3 @@
-from random import randint
-
 import pygame
 
 from game import SnakeGame

@@ -69,9 +69,9 @@ class Movement:
         else:
             position.y = position.y + value
             if value > 0:
-                cls.update_direction(position, Direction.BOTTOM)
+                cls.update_direction(position, Direction.DOWN)
             else:
-                cls.update_direction(position, Direction.TOP)
+                cls.update_direction(position, Direction.UP)
             if position.y + Shape.get_size_n(shape_type).height > SnakeGame.config.WIN_HEIGHT:  # bottom corner
                 if not position.is_jumping_vertically:
                     position.is_jumping_vertically = True
