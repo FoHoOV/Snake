@@ -109,7 +109,7 @@ class Shape:
 
             if datetime.datetime.utcnow() - self._randomize_position_s < datetime.timedelta(
                     seconds=self.randomize_position_time_limit):
-                rand_num = randint(1, 10000)
+                rand_num = randint(1, 2000)
                 if rand_num < 100:
                     self.move_up()
                 elif rand_num < 200:
