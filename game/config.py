@@ -22,4 +22,4 @@ class Config:
 
         self.FPS = 60
         self.AI = False  # if you want the very simple ai to play the game set the game to easy mod
-        self.EASY_MODE = True  # if set to true you wont loose if you hit yourself or the corners
+        self.EASY_MODE = False  # if set to true you wont loose if you hit yourself or the corners
