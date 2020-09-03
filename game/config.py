@@ -12,7 +12,7 @@ class Config:
         self.CORNERS_BLOCK_WIDTH = Shape.get_size(Shape.CORNERS_BLOCK)[0]
 
         self.INITIAL_SNAKE_LENGTH = 19
-        self.MOVE_FOOD_BLOCKS=True
+        self.MOVE_FOOD_BLOCKS = True
         self.MAX_FOOD_BLOCKS_LENGTH = 2
         self.MAX_SPEED_BLOCKS_LENGTH = 2
 

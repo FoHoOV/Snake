@@ -91,9 +91,14 @@ class GameManager:
                 if food_loop_counter >= 150:
                     if len(self.state.food_blocks) < SnakeGame.config.MAX_FOOD_BLOCKS_LENGTH:
                         pos = Position.random_position_generator()
-                        self.state.food_blocks.append(
-                            Shape(Shape.FOOD_BLOCK, x=pos[0], y=pos[1], randomize_position=True,
-                                  randomize_position_interval=10))
+                        if SnakeGame.config.MOVE_FOOD_BLOCKS:
+                            self.state.food_blocks.append(
+                                Shape(Shape.FOOD_BLOCK, x=pos[0], y=pos[1], randomize_position=True,
+                                      randomize_position_interval=10))
+                        else:
+                            self.state.food_blocks.append(
+                                Shape(Shape.FOOD_BLOCK, x=pos[0], y=pos[1]))
+
                     food_loop_counter = 0
                     if speed_loop_counter > 5:
                         if len(self.state.speed_blocks) < SnakeGame.config.MAX_SPEED_BLOCKS_LENGTH and (
