@@ -13,7 +13,7 @@ class Config:
 
         self.INITIAL_SNAKE_LENGTH = 3
         self.MOVE_FOOD_BLOCKS = True
-        self.MAX_FOOD_BLOCKS_LENGTH = 2
+        self.MAX_FOOD_BLOCKS_LENGTH = 4
         self.MAX_SPEED_BLOCKS_LENGTH = 2
 
         self.INITIAL_DIRECTION = Direction.LEFT
