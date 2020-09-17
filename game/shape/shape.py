@@ -535,52 +535,53 @@ class Snake:
     def draw(self, pressed_keys, **kwargs):
         for snake_block in self.snake_blocks:
             snake_block.draw(**kwargs)
-            if snake_block.index == 0:
-                if snake_block.is_hit_at_corners():
-                    SnakeGame.game_manager.state.set_loosing_state(GameState.HIT_CORNERS)
-                if pressed_keys:
-                    for pressed_key in pressed_keys:
-                        if pressed_key == pygame.K_RIGHT:
-                            self.update_block_position(snake_block,
-                                                       snake_block.position.velocity, True)
-                        if pressed_key == pygame.K_LEFT:
-                            self.update_block_position(snake_block,
-                                                       -snake_block.position.velocity, True)
-                        if pressed_key == pygame.K_UP:
+            if not SnakeGame.game_manager.state.is_paused:
+                if snake_block.index == 0:
+                    if snake_block.is_hit_at_corners():
+                        SnakeGame.game_manager.state.set_loosing_state(GameState.HIT_CORNERS)
+                    if pressed_keys:
+                        for pressed_key in pressed_keys:
+                            if pressed_key == pygame.K_RIGHT:
+                                self.update_block_position(snake_block,
+                                                           snake_block.position.velocity, True)
+                            if pressed_key == pygame.K_LEFT:
+                                self.update_block_position(snake_block,
+                                                           -snake_block.position.velocity, True)
+                            if pressed_key == pygame.K_UP:
+                                self.update_block_position(snake_block,
+                                                           -snake_block.position.velocity, False)
+                            if pressed_key == pygame.K_DOWN:
+                                self.update_block_position(snake_block,
+                                                           snake_block.position.velocity, False)
+                    else:
+                        if snake_block.position.direction == Direction.UP:
                             self.update_block_position(snake_block,
                                                        -snake_block.position.velocity, False)
-                        if pressed_key == pygame.K_DOWN:
+                        elif snake_block.position.direction == Direction.DOWN:
+                            self.update_block_position(snake_block, snake_block.position.velocity,
+                                                       False)
+                        elif snake_block.position.direction == Direction.RIGHT:
+                            self.update_block_position(snake_block, snake_block.position.velocity,
+                                                       True)
+                        elif snake_block.position.direction == Direction.LEFT:
                             self.update_block_position(snake_block,
-                                                       snake_block.position.velocity, False)
+                                                       -snake_block.position.velocity, True)
                 else:
-                    if snake_block.position.direction == Direction.UP:
-                        self.update_block_position(snake_block,
-                                                   -snake_block.position.velocity, False)
-                    elif snake_block.position.direction == Direction.DOWN:
-                        self.update_block_position(snake_block, snake_block.position.velocity,
-                                                   False)
-                    elif snake_block.position.direction == Direction.RIGHT:
-                        self.update_block_position(snake_block, snake_block.position.velocity,
-                                                   True)
-                    elif snake_block.position.direction == Direction.LEFT:
-                        self.update_block_position(snake_block,
-                                                   -snake_block.position.velocity, True)
-            else:
-                if snake_block.is_collided_with_block(self.snake_blocks[0]):
-                    SnakeGame.game_manager.state.set_loosing_state(GameState.HIT_IT_SELF)
-                for position in snake_block.positions_to_go[0]:
-                    if position.direction == Direction.UP:
-                        self.update_block_position(snake_block, -position.velocity, False)
-                    elif position.direction == Direction.DOWN:
-                        self.update_block_position(snake_block, position.velocity, False)
-                    elif position.direction == Direction.RIGHT:
-                        self.update_block_position(snake_block, position.velocity, True)
-                    elif position.direction == Direction.LEFT:
-                        self.update_block_position(snake_block, -position.velocity, True)
-                del snake_block.positions_to_go[0]
-            if snake_block.index + 1 < len(self.snake_blocks):
-                if not self.snake_blocks[snake_block.index + 1].positions_to_go[-1]:
-                    del self.snake_blocks[snake_block.index + 1].positions_to_go[-1]
+                    if snake_block.is_collided_with_block(self.snake_blocks[0]):
+                        SnakeGame.game_manager.state.set_loosing_state(GameState.HIT_IT_SELF)
+                    for position in snake_block.positions_to_go[0]:
+                        if position.direction == Direction.UP:
+                            self.update_block_position(snake_block, -position.velocity, False)
+                        elif position.direction == Direction.DOWN:
+                            self.update_block_position(snake_block, position.velocity, False)
+                        elif position.direction == Direction.RIGHT:
+                            self.update_block_position(snake_block, position.velocity, True)
+                        elif position.direction == Direction.LEFT:
+                            self.update_block_position(snake_block, -position.velocity, True)
+                    del snake_block.positions_to_go[0]
+                if snake_block.index + 1 < len(self.snake_blocks):
+                    if not self.snake_blocks[snake_block.index + 1].positions_to_go[-1]:
+                        del self.snake_blocks[snake_block.index + 1].positions_to_go[-1]
 
     def change_velocity(self, time_limit: int = 15):
 
