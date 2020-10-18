@@ -103,7 +103,7 @@ class Shape:
         self.randomize_position_interval = randomize_position_interval
 
     def draw(self, **kwargs):
-        if self.randomize_position:
+        if self.randomize_position and not SnakeGame.game_manager.state.is_paused:
             if not self._randomize_position_s:
                 self._randomize_position_s = datetime.datetime.utcnow().now()
 
